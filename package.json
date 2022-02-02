@@ -1,0 +1,21 @@
+{
+	"name": "3-en-raya-b",
+	"version": "1.0.0",
+	"description": "",
+	"main": "index.js",
+	"scripts": {
+		"start": "node index.js --env=prod",
+		"start:local": "nodemon index.js --env=local"
+	},
+	"keywords": [],
+	"author": "",
+	"license": "ISC",
+	"dependencies": {
+		"entor": "^1.2.3",
+		"fastify": "^3.27.0",
+		"mongodb": "^4.3.1"
+	},
+	"devDependencies": {
+		"nodemon": "^2.0.15"
+	}
+}
