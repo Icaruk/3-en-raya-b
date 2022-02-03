@@ -5,7 +5,8 @@
 	"main": "index.js",
 	"scripts": {
 		"start": "node index.js --env=prod",
-		"start:local": "nodemon index.js --env=local"
+		"start:mon": "nodemon index.js --env=prod | pino-pretty",
+		"start:local": "nodemon index.js --env=local | pino-pretty"
 	},
 	"keywords": [],
 	"author": "",
@@ -13,9 +14,11 @@
 	"dependencies": {
 		"entor": "^1.2.3",
 		"fastify": "^3.27.0",
+		"fastify-cors": "^6.0.2",
 		"mongodb": "^4.3.1"
 	},
 	"devDependencies": {
-		"nodemon": "^2.0.15"
+		"nodemon": "^2.0.15",
+		"pino-pretty": "6.0.0"
 	}
 }

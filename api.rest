@@ -1,0 +1,30 @@
+@url = http://localhost:3100
+
+
+
+GET {{url}}/version
+###
+
+
+
+POST {{url}}/newMatch
+Content-Type: application/json
+
+{
+	"username": "Pepito123"
+}
+###
+
+
+
+GET {{url}}/match/61fc4cff4edb5645e98d64dd
+###
+
+PUT {{url}}/match
+Content-Type: application/json
+
+{
+	"matchId": "61fc547e2029b06b54120145",
+	"coords": [0, 0]
+}
+###

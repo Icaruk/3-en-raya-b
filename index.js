@@ -20,26 +20,19 @@ require("entor")();
 // Fastify
 // ############################################################
 
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 9999;
 
 (async() => {
 	
-	// global.fastify = fastify; // de momento no hace falta
-	
-	// fastify.register(require("./router"), /*{prefix: "/api"}*/);
-	// fastify.register(require("fastify-cors"), { // https://github.com/fastify/fastify-cors
-	// 	// origin: "*",
-	// 	origin: process.env.MODE === "prod" ? ["https://economos.app"] : "*",
-	// 	methods: ["OPTIONS", "GET", "POST", "PUT", "PATCH", "DELETE"],
-	// });
-	
-	
-	
-	fastify.get("/version", async (request, reply) => {
-		return {
-			v: version
-		}
+	fastify.register(require("fastify-cors"), { // https://github.com/fastify/fastify-cors
+		origin: "*",
+		// origin: process.env.MODE === "prod" ? ["https://miweb.app"] : "*",
+		methods: ["OPTIONS", "GET", "POST", "PUT", "PATCH", "DELETE"],
 	});
+	
+	
+	
+	fastify.register(require("./router"), /*{prefix: "/api"}*/);
 	
 	
 	
