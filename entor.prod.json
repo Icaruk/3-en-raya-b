@@ -1,5 +1,5 @@
 {
-	"MODE": "dev",
+	"MODE": "prod",
 	"PORT": 3100,
 	"MONGO_URL": "mongodb+srv://shakers:tr353nr4y4!ñ@cluster0.j9rpr.mongodb.net/economos?authSource=admin&replicaSet=Cluster0-shard-0&readPreference=primary&ssl=true"
 }

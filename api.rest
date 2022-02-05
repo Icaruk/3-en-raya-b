@@ -11,14 +11,27 @@ POST {{url}}/newMatch
 Content-Type: application/json
 
 {
-	"username": "Pepito123"
+	"username": "pepito"
 }
 ###
 
 
 
-GET {{url}}/match/61fc4cff4edb5645e98d64dd
+POST {{url}}/newMatch
+Content-Type: application/json
+
+{
+	"username": "pepito",
+	"matchId": "61fef092da23c159cc915a19"
+}
 ###
+
+
+
+GET {{url}}/match/61fef092da23c159cc915a19
+###
+
+
 
 PUT {{url}}/match
 Content-Type: application/json
@@ -27,4 +40,14 @@ Content-Type: application/json
 	"matchId": "61fc547e2029b06b54120145",
 	"coords": [0, 0]
 }
+###
+
+
+
+GET {{url}}/ranking
+###
+
+
+
+GET {{url}}/ranking/pepito
 ###

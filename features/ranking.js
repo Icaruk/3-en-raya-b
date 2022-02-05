@@ -1,156 +1,74 @@
 const {FastifyReply, FastifyRequest} = require("fastify");
 const { ObjectId } = require("mongodb");
 const { getCollection } = require("../DB/mongoInit");
-const arrayDeepClone = require("../utils/arrayDeepClone");
-const getWinningPlay = require("../utils/getWinningPlay");
+const { IUsername } = require("./matches");
 
 
 
-const defaultTable = [
-	[0, 0, 0],
-	[0, 0, 0],
-	[0, 0, 0]
-];
-
-
-
-exports.IUsername = {
-	type: "string",
-	pattern: "^[a-zA-Z]{3,16}$",
-};
-
-
-
-exports.post_newMatch_schema = {
-	body: {
+exports.get_ranking_schema = {
+	params: {
 		type: "object",
-		required: ["username"],
 		properties: {
-			username: this.IUsername,
-			matchId: {
-				type: "string",
-			},
+			username: IUsername,
 		}
 	}
 };
 
-/**
- * @param {FastifyRequest} req 
- * @param {FastifyReply} rep 
-*/
-exports.post_newMatch = async (req, rep) => {
-	
-	const {username, matchId} = req.body;
-	
-	
-	// Tablero por defecto
-	const table = arrayDeepClone(defaultTable);
-	
-	
-	// ¿Quién empieza?
-	let turn = Math.floor(Math.random() * 2) + 1; // sólo puede dar 1 o 2;
-	
-	
-	// Si es turno de la IA
-	if (turn === 2) { 
-		table[1][1] = 2; // pongo ficha siempre en el centro
-		turn = 1; // devuelvo el turno al jugador
-	};
-	
-	
-	// Si me viene matchId es que quiero reiniciar una partida
-	if (matchId) {
-		
-		// Actualizo match
-		const resUpdate = await getCollection("matches").updateOne({
-			_id: ObjectId(matchId),
-		}, {
-			$set: {
-				username,
-				table: table,
-				turn: turn,
-				startedAt: new Date(),
-				endedAt: null,
-				status: "playing",
-				winner: null,
-			}
-		});
-		
-		if (resUpdate.modifiedCount === 0) return rep.status(500).send({
-			message: "Error al reiniciar la partida",
-			error: resUpdate.lastErrorObject,
-		});
-		
-		
-		return {
-			_id: matchId,
-			table: table,
-			turn: turn,
-		};
-		
-	} else {
-		
-		// Inserto
-		const resInsert = await getCollection("matches").insertOne({
-			username,
-			table: table,
-			turn: turn,
-			startedAt: new Date(),
-			endedAt: null,
-			status: "playing",
-			winner: null,
-		});
-		
-		if (!resInsert.insertedId) return rep.status(500).send({
-			message: "Error al crear la partida",
-		});
-		
-		
-		
-		return {
-			_id: resInsert.insertedId,
-			table: table,
-			turn: turn,
-		};
-		
-	};
-	
-	
-	
-};
-
 
 
 /**
  * @param {FastifyRequest} req 
  * @param {FastifyReply} rep 
 */
-exports.get_match = async (req, rep) => {
+exports.get_ranking = async (req, rep) => {
 	
-	const {_id} = req.params;
+	const {username} = req.params;
+	
+	
+	// Genero la query del match
+	const objMatch = {
+		status: "ended",
+		winner: {
+			$ne: null,
+		},
+	};
+	
+	if (username) objMatch.username = username;
 	
 	
 	
 	// Busco
-	const match = await getCollection("matches").findOne({
-		_id: ObjectId(_id),
-	}, {
-		projection: {
-			_id: 0,
-			username: 1,
-			table: 1,
-			turn: 1,
-			status: 1,
-			winner: 1,
+	const resAggregate = await getCollection("matches").aggregate([
+		{
+			$match: objMatch,
+		},
+		{
+			$group: {
+				_id: "$winner",
+				wins: {
+					$sum: 1
+				}
+			}
+		},
+		{
+			$sort: {
+				wins: -1
+			}
+		},
+		{
+			$limit: 10
+		},
+		{
+			$project: {
+				_id: 0,
+				username: "$_id",
+				wins: 1
+			}
 		}
-	});
+	]).toArray();
 	
 	
-	if (!match) return rep.status(404).send({
-		message: "No existe la partida",
-	});
-	
-	return match;
+	return resAggregate;
 	
 };
 
@@ -261,7 +179,6 @@ exports.put_match = async (req, rep) => {
 			table: table,
 			turn: 1,
 			status: "ended",
-			endedAt: new Date(),
 			winner: match.username,
 		};
 		
@@ -294,7 +211,6 @@ exports.put_match = async (req, rep) => {
 			table: table,
 			turn: 1,
 			status: "ended",
-			endedAt: new Date(),
 			winner: null,
 		};
 		
@@ -319,7 +235,6 @@ exports.put_match = async (req, rep) => {
 			table: table,
 			turn: 1,
 			status: "ended",
-			endedAt: new Date(),
 			winner: "IA",
 		};
 		
@@ -349,7 +264,6 @@ exports.put_match = async (req, rep) => {
 			table: table,
 			turn: 1,
 			status: "ended",
-			endedAt: new Date(),
 			winner: null,
 		};
 		

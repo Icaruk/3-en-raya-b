@@ -1,5 +1,6 @@
 
 const matches = require("./features/matches");
+const ranking = require("./features/ranking");
 
 
 
@@ -34,6 +35,13 @@ module.exports = async (fastify, options) => {
 		url: "/match",
 		schema: matches.put_match_schema,
 		handler: matches.put_match,
+	});
+	
+	fastify.route({
+		method: "GET",
+		url: "/ranking/:username?",
+		schema: ranking.get_ranking_schema,
+		handler: ranking.get_ranking,
 	});
 	
 };
