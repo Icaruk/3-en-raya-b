@@ -6,7 +6,8 @@
 	"scripts": {
 		"start": "node index.js --env=prod",
 		"start:mon": "nodemon index.js --env=prod | pino-pretty",
-		"start:local": "nodemon index.js --env=local | pino-pretty"
+		"start:local": "nodemon index.js --env=local | pino-pretty",
+		"jest": "jest"
 	},
 	"keywords": [],
 	"author": "",
@@ -18,6 +19,7 @@
 		"mongodb": "^4.3.1"
 	},
 	"devDependencies": {
+		"jest": "^27.5.0",
 		"nodemon": "^2.0.15",
 		"pino-pretty": "6.0.0"
 	}

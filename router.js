@@ -15,6 +15,7 @@ module.exports = async (fastify, options) => {
 	});
 	
 	
+	
 	fastify.route({
 		method: "POST",
 		url: "/newMatch",

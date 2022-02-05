@@ -1,5 +1,7 @@
+const {FastifyReply, FastifyRequest} = require("fastify");
 const { ObjectId } = require("mongodb");
 const { getCollection } = require("../DB/mongoInit");
+const getWinningPlay = require("../utils/getWinningPlay");
 
 
 
@@ -20,13 +22,20 @@ exports.post_newMatch_schema = {
 				type: "string",
 				pattern: "^[a-zA-Z]{3,16}$",
 			},
+			matchId: {
+				type: "string",
+			},
 		}
 	}
 };
 
+/**
+ * @param {FastifyRequest} req 
+ * @param {FastifyReply} rep 
+*/
 exports.post_newMatch = async (req, rep) => {
 	
-	const {username} = req.body;
+	const {username, matchId} = req.body;
 	
 	
 	// Tablero por defecto
@@ -44,39 +53,80 @@ exports.post_newMatch = async (req, rep) => {
 	};
 	
 	
-	// Inserto
-	const resInsert = await getCollection("matches").insertOne({
-		username,
-		table: table,
-		turn: turn,
-		startedAt: new Date(),
-		endedAt: null,
-		isInProgress: true,
-	});
-	
-	if (!resInsert.insertedId) return rep.status(500).send({
-		message: "Error al crear la partida",
-	});
-	
-	
-	
-	return {
-		_id: resInsert.insertedId,
-		table: table,
-		turn: turn,
+	// Si me viene matchId es que quiero reiniciar una partida
+	if (matchId) {
+		
+		// Actualizo match
+		const resUpdate = await getCollection("matches").updateOne({
+			_id: ObjectId(matchId),
+		}, {
+			$set: {
+				username,
+				table: table,
+				turn: turn,
+				startedAt: new Date(),
+				endedAt: null,
+				status: "playing",
+				winner: null,
+			}
+		});
+		
+		if (resUpdate.modifiedCount === 0) return rep.status(500).send({
+			message: "Error al reiniciar la partida",
+			error: resUpdate.lastErrorObject,
+		});
+		
+		
+		return {
+			_id: matchId,
+			table: table,
+			turn: turn,
+		};
+		
+	} else {
+		
+		// Inserto
+		const resInsert = await getCollection("matches").insertOne({
+			username,
+			table: table,
+			turn: turn,
+			startedAt: new Date(),
+			endedAt: null,
+			status: "playing",
+			winner: null,
+		});
+		
+		if (!resInsert.insertedId) return rep.status(500).send({
+			message: "Error al crear la partida",
+		});
+		
+		
+		
+		return {
+			_id: resInsert.insertedId,
+			table: table,
+			turn: turn,
+		};
+		
 	};
+	
+	
 	
 };
 
 
 
+/**
+ * @param {FastifyRequest} req 
+ * @param {FastifyReply} rep 
+*/
 exports.get_match = async (req, rep) => {
 	
 	const {_id} = req.params;
 	
 	
 	
-	// Inserto
+	// Busco
 	const match = await getCollection("matches").findOne({
 		_id: ObjectId(_id),
 	}, {
@@ -85,7 +135,8 @@ exports.get_match = async (req, rep) => {
 			username: 1,
 			table: 1,
 			turn: 1,
-			isInProgress: 1,
+			status: 1,
+			winner: 1,
 		}
 	});
 	
@@ -100,15 +151,37 @@ exports.get_match = async (req, rep) => {
 
 
 
+/**
+ * Actualiza un match.
+ * @param {string} matchId 
+ * @param {*} setObj Objeto que irá al `$set`
+ * @returns {boolean} Éxito de la operación
+*/
+async function updateMatch(matchId, setObj) {
+	
+	const resUpdate = await getCollection("matches").updateOne({
+		_id: ObjectId(matchId),
+	}, {
+		$set: setObj,
+	});
+	
+	
+	if (resUpdate.modifiedCount === 0) return false;
+	return true;
+	
+};
+
 exports.put_match_schema = {
 	body: {
 		type: "object",
 		required: ["matchId", "coords"],
 		properties: {
 			matchId: {
+				description: "_id de la partida",
 				type: "string",
 			},
 			coords: {
+				description: "Coordenadas de la jugada del jugador 1",
 				type: "array",
 				items: {
 					type: "integer",
@@ -119,6 +192,12 @@ exports.put_match_schema = {
 	}
 };
 
+
+
+/**
+ * @param {FastifyRequest} req 
+ * @param {FastifyReply} rep 
+*/
 exports.put_match = async (req, rep) => {
 	
 	const {matchId, coords} = req.body;
@@ -132,9 +211,13 @@ exports.put_match = async (req, rep) => {
 		projection: {
 			table: 1,
 			turn: 1,
+			username: 1,
 		}
 	});
 	
+	if (!match) return rep.status(404).send({
+		message: "No existe la partida",
+	});
 	
 	if (match.turn === 2) return rep.status(401).send({
 		message: "No es tu turno",
@@ -145,65 +228,138 @@ exports.put_match = async (req, rep) => {
 	const table = match.table;
 	const [fil, col] = coords;
 	
-	if (table[fil][col]) return rep.status(400).send({
+	if (table[fil][col]) return rep.status(401).send({
 		message: "Esa casilla ya está ocupada",
 	});
 	
 	
 	
-	// Muto el tablero
-	table[fil][col] = 1; // jugador 1 (humano) mete ficha
+	// ############################################################
+	// Jugador 1 (humano) mete ficha
+	// ############################################################
+	
+	table[fil][col] = 1; 
+	
+	
+	// Obtengo jugadas ganadoras
+	const winningPlays = getWinningPlay(table);
+	
+	
+	
+	// ***********************************************************
+	// Compruebo si el jugador 1 ha hecho una jugada ganadora
+	// ***********************************************************
+	
+	if (winningPlays.p1.definitive.length > 0) {
+		
+		const _obj = {
+			table: table,
+			turn: 1,
+			status: "ended",
+			winner: match.username,
+		};
+		
+		updateMatch(matchId, _obj);
+		return _obj;
+		
+	};
+	
+	
+	
+	// ***********************************************************
+	// Si no hay espacios vacíos, la partida ha terminado
+	// ***********************************************************
+	
+	// Busco los espacios vacíos
+	const emptySpaces = [];
+	
+	for (let _fil = 0; _fil < table.length; _fil++) {
+		
+		const _tableFile = table[_fil];
+		
+		for (let _col = 0; _col < _tableFile.length; _col++) {
+			if (!_tableFile[_col]) emptySpaces.push([_fil, _col]);
+		};
+	};
+	
+	if (emptySpaces.length === 0) {
+		
+		const _obj = {
+			table: table,
+			turn: 1,
+			status: "ended",
+			winner: null,
+		};
+		
+		updateMatch(matchId, _obj);
+		return _obj;
+		
+	};
 	
 	
 	
 	// ***********************************************************
 	// Juego el turno de la IA
-	// ***********************************************************
+	// ***********************************************************		
 	
-	// PENDIENTE 
-	// Busco los espacios vacíos
-	const emptySpaces = [];
-	
-	for (let _fil = 0; _fil < table.length; _fil++) {
-		for (let _col = 0; _col < table[_fil].length; _col++) {
-			if (!table[_fil][_col]) emptySpaces.push([_fil, _col]);
+	// Primero busco si yo (la IA) puedo ganar
+	if (winningPlays.p2.possible.length > 0) {
+		
+		const winningCoords = winningPlays.p2.possible[0].winningCoords[0];
+		table[winningCoords[0]][winningCoords[1]] = 2; // IA mete ficha para ganar
+		
+		const _obj = {
+			table: table,
+			turn: 1,
+			status: "ended",
+			winner: "IA",
 		};
+		
+		updateMatch(matchId, _obj);
+		return _obj;
+		
+	// Luego busco si puedo bloquear una futura jugada ganadora del jugador 1
+	} else if (winningPlays.p1.possible.length > 0) {
+		
+		const winningCoords = winningPlays.p1.possible[0].winningCoords[0];
+		table[winningCoords[0]][winningCoords[1]] = 2; // IA mete ficha para bloquear la victoria del jugador 1
+		
+	// Como no me queda otra opción, juego aleatoriamente
+	} else {
+		
+		// Escojo un espacio vacío aleatorio y pongo la ficha de la IA
+		const [emptyFil, emptyCol] = emptySpaces[Math.floor(Math.random() * emptySpaces.length)];
+		table[emptyFil][emptyCol] = 2; // IA mete ficha
+		
 	};
 	
 	
-	// Si no hay espacios vacíos, la partida ha terminado
-	if (emptySpaces.length === 0) {
-		// PENDIENTE
-		console.log( "Partida terminada" );
+	
+	// Si es el último espacio vacío y acaba de jugar la IA sin victoria, el tablero está lleno sin ganadores
+	if (emptySpaces.length === 1) {
+		const _obj = {
+			table: table,
+			turn: 1,
+			status: "ended",
+			winner: null,
+		};
+		
+		updateMatch(matchId, _obj);
+		return _obj;
 	};
 	
 	
-	// Escojo un espacio vacío aleatorio y pongo la ficha de la IA
-	const [emptyFil, emptyCol] = emptySpaces[Math.floor(Math.random() * emptySpaces.length)];
-	table[emptyFil][emptyCol] = 2; // IA mete ficha
 	
-	
-	
-	// Actualizo
-	const resUpdate = await getCollection("matches").updateOne({
-		_id: ObjectId(matchId),
-	}, {
-		$set: {
-			table: match.table,
-			turn: match.turn,
-		},
-	});
-	
-	
-	if (resUpdate.modifiedCount === 0) return rep.status(500).send({
-		message: "Error al actualizar la partida",
-	});
-	
-	
-	
-	return {
-		table: match.table,
-		turn: match.turn,
+	const _obj = {
+		table: table,
+		turn: 1,
+		status: "playing",
+		winner: null,
 	};
+	
+	updateMatch(matchId, _obj);
+	return _obj;
 	
 };
+
+
