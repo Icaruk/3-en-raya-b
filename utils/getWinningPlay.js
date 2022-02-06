@@ -74,9 +74,9 @@ module.exports = function getWinningPlay(table) {
 	
 	
 	
-	// Obtengo columnas y diagonales
 	if (table.length > 1) { // sólo si la altura es mayor a 1
 		
+		// Obtengo las columnas invirtiendo las coordenadas de las filas
 		filas.forEach( (_fil, _idxFil) => {
 			// _fil es [ [0, 0], [0, 1], [0, 2] ]
 			
@@ -95,7 +95,7 @@ module.exports = function getWinningPlay(table) {
 		
 		
 		
-		// Obtengo diagonal /
+		// Obtengo diagonal \ y luego /
 		const startingPoint1 = [0, 0];
 		const startingPoint2 = [0, 2];
 		
@@ -131,8 +131,8 @@ module.exports = function getWinningPlay(table) {
 		[[0,1],[1,1],[2,1]],
 		[[0,2],[1,2],[2,2]],
 		
-		[[2,2],[1,1],[0,0]],
-		[[0,0],[1,1],[2,2]]
+		[[0,0],[1,1],[2,2]],
+		[[0,2],[1,1],[2,0]]
 	]
 	*/
 	
@@ -164,13 +164,14 @@ module.exports = function getWinningPlay(table) {
 		});
 		
 		
-		
+		// Jugador tiene 2 y la IA ninguna
 		if (p1ChipCoords.length === 2 && p2ChipCoords.length === 0) {
 			winningPlays.p1.possible.push({
 				line: p1ChipCoords,
 				winningCoords: missingChipCoords,
 			});
 		};
+		// Jugador tiene 3 fichas
 		if (p1ChipCoords.length === 3) {
 			winningPlays.p1.definitive.push({
 				line: p1ChipCoords,
@@ -178,13 +179,14 @@ module.exports = function getWinningPlay(table) {
 			});
 		};
 		
-		
+		// La IA tiene 2 y el jugador ninguna
 		if (p2ChipCoords.length === 2 && p1ChipCoords.length === 0) {
 			winningPlays.p2.possible.push({
 				line: p2ChipCoords,
 				winningCoords: missingChipCoords,
 			});
 		};
+		// La IA tiene 3 fichas
 		if (p2ChipCoords.length === 3) {
 			winningPlays.p2.definitive.push({
 				line: p2ChipCoords,
@@ -198,26 +200,4 @@ module.exports = function getWinningPlay(table) {
 	return winningPlays;
 	
 };
-
-
-
-// const winnning = module.exports([
-// 	[1, 0, 2],
-// 	[1, 2, 0],
-// 	[0, 0, 0],
-// ]);
-
-// console.log( "p1 possible" );
-// winnning.p1.possible.forEach( _x => console.log(_x) )
-// console.log( "p1 definitive" );
-// winnning.p1.definitive.forEach( _x => console.log(_x) )
-
-// console.log( "" );
-
-// console.log( "p2 possible" );
-// winnning.p2.possible.forEach( _x => console.log(_x) )
-// console.log( "p2 definitive" );
-// winnning.p2.definitive.forEach( _x => console.log(_x) )
-
-
 
