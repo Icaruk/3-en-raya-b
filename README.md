@@ -89,8 +89,15 @@ https://github.com/Icaruk/3-en-raya-b
 - En el front: `npm run dev`
 - En el back: `npm run start`
 
-El front estará en http://localhost:6500
-El back estará en http://localhost:6600
+Los puertos son:
+
+- Front: http://localhost:6500
+- Back: http://localhost:6600
+
+
+**📦También he hecho deploy a producción:**
+- Front: https://tresenraya.icaruk.dev
+- Back https://api.tresenraya.icaruk.dev
 
 
 # Features
