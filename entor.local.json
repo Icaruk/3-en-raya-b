@@ -1,5 +1,5 @@
 {
 	"MODE": "local",
-	"PORT": 3100,
+	"PORT": 6600,
 	"MONGO_URL": "mongodb://localhost:27017"
 }

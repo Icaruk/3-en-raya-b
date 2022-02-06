@@ -89,8 +89,8 @@ https://github.com/Icaruk/3-en-raya-b
 - En el front: `npm run dev`
 - En el back: `npm run start`
 
-El front estará en http://localhost:3000
-El back estará en http://localhost:3100
+El front estará en http://localhost:6500
+El back estará en http://localhost:6600
 
 
 # Features

@@ -1,5 +1,5 @@
 {
 	"MODE": "EXAMPLE",
-	"PORT": 3100,
+	"PORT": 6600,
 	"MONGO_URL": "mongodb+srv://EXAMPLE"
 }
