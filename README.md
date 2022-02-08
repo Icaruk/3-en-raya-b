@@ -10,12 +10,12 @@
 	- [Back](#back)
 - [Cómo lanzar la aplicación](#cómo-lanzar-la-aplicación)
 - [Features](#features)
-		- [Multiusuario](#multiusuario)
-		- [Turno inicial aleatorio](#turno-inicial-aleatorio)
-		- [Partidas reanudables](#partidas-reanudables)
-		- [IA](#ia)
-		- [Reiniciable](#reiniciable)
-		- [Ranking](#ranking)
+	- [Multiusuario](#multiusuario)
+	- [Turno inicial aleatorio](#turno-inicial-aleatorio)
+	- [Partidas reanudables](#partidas-reanudables)
+	- [IA](#ia)
+	- [Reiniciable](#reiniciable)
+	- [Ranking](#ranking)
 - [Estructura en MongoDB](#estructura-en-mongodb)
 - [Notas](#notas)
 
@@ -102,18 +102,18 @@ Los puertos son:
 
 # Features
 
-### Multiusuario
+## Multiusuario
 El jugador elige su username al empezar la partida.
 
 ![](https://i.gyazo.com/ee9bb4d6b19962346bf846449ce5fd29.png)
 
-### Turno inicial aleatorio
+## Turno inicial aleatorio
 El inicio del turno será aleatorio, si empieza la IA siempre colocará su ficha en el centro.
 
-### Partidas reanudables
+## Partidas reanudables
 Mientras no se pierda la URL de la partida, da igual si se refresca la página.
 
-### IA
+## IA
 Tendrá las siguientes prioridades en sus jugadas:
 
 1. Colocar ficha en una posición que le conceda la victoria.
@@ -121,18 +121,19 @@ Tendrá las siguientes prioridades en sus jugadas:
 3. Jugar aleatoriamente en una posición vacía.
 
 _Lamentablemente, la IA no intenta hacer la jugada de "el triángulo de la muerte"_
-⬜⬜⬜
-⬜❌⬜
-❌⬜❌
+
+⬜⬜⬜  
+⬜❌⬜  
+❌⬜❌  
 
 ![](https://i.gyazo.com/3e365198537f9e1e2459fb67b93cd96d.png)
 
-### Reiniciable
+## Reiniciable
 
 😭 ¿Quieres hacer trampas? ¿Estás perdiendo? Pulsa sobre el botón "Reset" y empieza de nuevo la partida.
 Como si no hubiera pasado nada 🪄.
 
-### Ranking
+## Ranking
 
 Se listará el top 10 de jugadores con más victorias.
 
