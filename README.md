@@ -84,7 +84,7 @@ https://github.com/Icaruk/3-en-raya-b
 
 # Cómo lanzar la aplicación
 
-*(Los archivos de entorno están pusheados para facilidad de la review, el usuario de mongo tiene acceso limitado)*
+*(Los archivos de entorno están pusheados para facilidad de la review, ~~el usuario de mongo tiene acceso limitado~~ el usuario ya no tiene permisos)*
 
 - En el front: `npm run dev`
 - En el back: `npm run start`
