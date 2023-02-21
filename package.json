@@ -14,7 +14,7 @@
 	"license": "ISC",
 	"dependencies": {
 		"entor": "^1.2.3",
-		"fastify": "^3.27.0",
+		"fastify": "^3.29.4",
 		"fastify-cors": "^6.0.2",
 		"mongodb": "^4.3.1"
 	},
