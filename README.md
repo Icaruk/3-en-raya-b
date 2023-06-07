@@ -117,7 +117,7 @@ Mientras no se pierda la URL de la partida, da igual si se refresca la página.
 Tendrá las siguientes prioridades en sus jugadas:
 
 1. Colocar ficha en una posición que le conceda la victoria.
-2. Colocar ficha en una posición impida la victoria del jugador humano.
+2. Colocar ficha en una posición que impida la victoria del jugador humano.
 3. Jugar aleatoriamente en una posición vacía.
 
 _Lamentablemente, la IA no intenta hacer la jugada de "el triángulo de la muerte"_
